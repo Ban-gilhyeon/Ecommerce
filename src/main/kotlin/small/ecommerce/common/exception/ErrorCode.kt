@@ -29,5 +29,6 @@ enum class ErrorCode(
     TOKEN_USER_ID_INVALID("J012", "토큰의 사용자 ID가 유효하지 않습니다.", 401),
 
     //user
-    NOT_FOUND_USER("U001", "해당 이메일의 사용자를 찾을 수 없습니다..", 404),
+    NOT_FOUND_USER_BY_EMAIL("U001", "해당 이메일의 사용자를 찾을 수 없습니다..", 404),
+    USER_ALREADY_EXISTS("U002", "이미 가입된 이메일입니다.", 400)
 }

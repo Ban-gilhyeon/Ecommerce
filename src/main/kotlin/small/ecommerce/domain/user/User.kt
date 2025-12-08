@@ -6,6 +6,10 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import small.ecommerce.domain.BaseTimeEntity
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -21,8 +25,8 @@ class User(
     val password: String,
 
     @Column(nullable = false)
-    val name: String,
+    val name: String
 
-) {
+): BaseTimeEntity(){
 
 }
