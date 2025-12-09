@@ -1,4 +1,4 @@
-package small.ecommerce.domain.user
+package small.ecommerce.domain.exception
 
 import small.ecommerce.common.exception.BaseException
 import small.ecommerce.common.exception.ErrorCode

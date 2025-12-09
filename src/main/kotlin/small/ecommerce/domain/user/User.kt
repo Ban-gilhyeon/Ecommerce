@@ -1,11 +1,6 @@
 package small.ecommerce.domain.user
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import small.ecommerce.domain.BaseTimeEntity
@@ -25,7 +20,11 @@ class User(
     val password: String,
 
     @Column(nullable = false)
-    val name: String
+    val name: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    val role: UserRole
 
 ): BaseTimeEntity(){
 

@@ -4,11 +4,12 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import small.ecommerce.auth.exception.AuthException
 import small.ecommerce.auth.jwt.JwtTokenProvider
 import small.ecommerce.common.exception.ErrorCode
+import small.ecommerce.domain.auth.dto.AuthLoginResponse
 import small.ecommerce.domain.user.User
-import small.ecommerce.domain.user.UserException
+import small.ecommerce.domain.exception.UserException
+import small.ecommerce.domain.user.UserRole
 import small.ecommerce.domain.user.UserService
 import small.ecommerce.domain.user.dto.UserSignUpRequest
 import small.ecommerce.domain.user.dto.UserSignUpResponse
@@ -36,7 +37,8 @@ class AuthService(
         val user = User(
             email = request.email,
             password = encodedPassword.toString(),
-            name = request.name
+            name = request.name,
+            role = UserRole.valueOf(request.role)
         )
         userService.saveUser(user)
 
@@ -48,12 +50,17 @@ class AuthService(
         )
     }
 
-    fun login(email: String, password: String): String{
+    fun login(email: String, password: String): AuthLoginResponse{
         val authenticationToken = UsernamePasswordAuthenticationToken(email, password)
         authenticationManager.authenticate(authenticationToken)
 
         //로그인 성공 시 JWT 발급
         val user = userService.getUserByEmail(email)
-        return jwtTokenProvider.generateAccessToken(user.id)
+        val accessToken: String = jwtTokenProvider.generateAccessToken(user.id)
+        val response: AuthLoginResponse = AuthLoginResponse(
+            accessToken = "Bearer "+ accessToken,
+            email = user.email
+        )
+        return response
     }
 }

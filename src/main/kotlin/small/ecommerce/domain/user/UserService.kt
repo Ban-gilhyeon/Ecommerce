@@ -2,6 +2,7 @@ package small.ecommerce.domain.user
 
 import org.springframework.stereotype.Service
 import small.ecommerce.common.exception.ErrorCode
+import small.ecommerce.domain.exception.UserException
 
 @Service
 class UserService(

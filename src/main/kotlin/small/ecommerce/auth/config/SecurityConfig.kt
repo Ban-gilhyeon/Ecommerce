@@ -33,7 +33,20 @@ class SecurityConfig (
             .csrf { it.disable() }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/", "/api/v1/auth/**").permitAll()
+                //공개 API
+                it.requestMatchers(
+                    "/",
+                    "/api/v1/auth/**",
+                    "/api/v1/brand/list"
+                ).permitAll() // 회원가입 로그인
+                
+                //SELLER 전용
+                it.requestMatchers(
+                    "/api/v1/brand/add"
+                ).hasRole("SELLER")
+
+                //BUYER 전용?
+
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
