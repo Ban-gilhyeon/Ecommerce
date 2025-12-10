@@ -11,5 +11,13 @@ enum class Category {
     ACCESSORY,
     BAG,
     SHOE,
-    UNDER_WEAR
+    UNDER_WEAR;
+
+    companion object{
+        fun from(value: String): Category =
+            entries.firstOrNull{ it.name.equals(value, ignoreCase = true)}
+                ?: throw IllegalArgumentException("Invalid category: $value")
+    }
+
+
 }

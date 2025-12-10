@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ProductRepository: JpaRepository<Product, Long> {
+    fun readProductsByBrandId(brandId: Long): MutableList<Product>
 }

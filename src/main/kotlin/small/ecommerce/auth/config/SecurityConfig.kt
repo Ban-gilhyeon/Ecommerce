@@ -39,7 +39,7 @@ class SecurityConfig (
                     "/api/v1/auth/**",
                     "/api/v1/brand/list"
                 ).permitAll() // 회원가입 로그인
-                
+
                 //SELLER 전용
                 it.requestMatchers(
                     "/api/v1/brand/add"

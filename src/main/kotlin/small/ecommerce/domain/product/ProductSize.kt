@@ -6,5 +6,10 @@ enum class ProductSize {
     M,
     L,
     XL,
-    XXL
+    XXL;
+    companion object{
+        fun from(value: String): ProductSize =
+            entries.firstOrNull{ it.name.equals(value, ignoreCase = true)}
+                ?: throw IllegalArgumentException("Invalid Product Size: $value")
+    }
 }

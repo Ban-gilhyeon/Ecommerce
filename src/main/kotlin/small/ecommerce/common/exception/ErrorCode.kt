@@ -31,5 +31,13 @@ enum class ErrorCode(
     //user
     NOT_FOUND_USER_BY_ID("U000", "회원을 찾을 수 없습니다.", 404),
     NOT_FOUND_USER_BY_EMAIL("U001", "해당 이메일의 사용자를 찾을 수 없습니다..", 404),
-    USER_ALREADY_EXISTS("U002", "이미 가입된 이메일입니다.", 400)
+    USER_ALREADY_EXISTS("U002", "이미 가입된 이메일입니다.", 400),
+
+    //Brand
+    BRAND_NOT_FOUND_BRAND("B000", "해당 브랜드를 찾을 수 없습니다.", 404),
+    BRAND_ALREADY_EXISTS("B001", "이미 등록된 브랜드입니다.", 400),
+
+    //Product
+    PRODUCT_NOT_FOUND_PRODUCT_BY_ID("P000", "헤당 상품을 찾을 수 없습니다.",404),
+
 }
