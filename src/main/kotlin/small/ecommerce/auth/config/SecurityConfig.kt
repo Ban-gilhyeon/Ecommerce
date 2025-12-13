@@ -37,7 +37,8 @@ class SecurityConfig (
                 it.requestMatchers(
                     "/",
                     "/api/v1/auth/**",
-                    "/api/v1/brand/list"
+                    "/api/v1/brand/list",
+                    "/api/v1/product/{brandId}/list"
                 ).permitAll() // 회원가입 로그인
 
                 //SELLER 전용
