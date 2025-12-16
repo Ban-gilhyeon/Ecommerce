@@ -1,7 +1,7 @@
 package small.ecommerce.domain.product.dto
 
-import small.ecommerce.domain.product.Category
-import small.ecommerce.domain.product.Gender
+import small.ecommerce.domain.enums.Category
+import small.ecommerce.domain.enums.Gender
 import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.product.ProductSize
 

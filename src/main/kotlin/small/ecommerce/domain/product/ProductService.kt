@@ -1,13 +1,12 @@
 package small.ecommerce.domain.product
 
-import org.hibernate.boot.models.annotations.spi.ColumnDetails.Mutable
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import small.ecommerce.common.exception.ErrorCode
 import small.ecommerce.domain.Brand.Brand
-import small.ecommerce.domain.Brand.BrandRepository
 import small.ecommerce.domain.Brand.BrandService
-import small.ecommerce.domain.exception.BrandException
+import small.ecommerce.domain.enums.Category
+import small.ecommerce.domain.enums.Gender
 import small.ecommerce.domain.exception.ProductException
 import small.ecommerce.domain.product.dto.ProductAddRequest
 import small.ecommerce.domain.product.dto.ProductAddResponse

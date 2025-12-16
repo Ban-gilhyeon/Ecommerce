@@ -3,6 +3,8 @@ package small.ecommerce.domain.product
 import jakarta.persistence.*
 import small.ecommerce.domain.BaseTimeEntity
 import small.ecommerce.domain.Brand.Brand
+import small.ecommerce.domain.enums.Category
+import small.ecommerce.domain.enums.Gender
 
 @Entity
 @Table(name = "products")

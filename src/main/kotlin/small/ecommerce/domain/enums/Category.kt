@@ -1,4 +1,4 @@
-package small.ecommerce.domain.product
+package small.ecommerce.domain.enums
 
 enum class Category {
     OUTER,

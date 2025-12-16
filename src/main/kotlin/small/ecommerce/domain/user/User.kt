@@ -24,7 +24,10 @@ class User(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val role: UserRole
+    val role: UserRole,
+
+    @Column(nullable = false)
+    val address: String,
 
 ): BaseTimeEntity(){
 
