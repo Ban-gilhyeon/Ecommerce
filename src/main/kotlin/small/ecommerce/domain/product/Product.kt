@@ -24,7 +24,7 @@ class Product(
     val brand: Brand,
 
     @Column(nullable = false)
-    val stock: Int,
+    var stock: Int,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

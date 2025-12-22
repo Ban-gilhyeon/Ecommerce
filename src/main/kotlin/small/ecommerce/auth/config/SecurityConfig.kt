@@ -48,6 +48,7 @@ class SecurityConfig (
 
                 //BUYER 전용?
 
+
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)

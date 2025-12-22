@@ -14,6 +14,9 @@ data class UserSignUpRequest(
 
     //임시 예외처리
     @field:NotBlank(message = "권한 입력해주세요")
-    val role: String
+    val role: String,
+
+    @field:NotBlank(message = "주소를 입력해주세요")
+    val address: String,
 ) {
 }

@@ -39,5 +39,11 @@ enum class ErrorCode(
 
     //Product
     PRODUCT_NOT_FOUND_PRODUCT_BY_ID("P000", "헤당 상품을 찾을 수 없습니다.",404),
+    PRODUCT_INVALID_PRODUCT_ID("P001", "상품 ID를 확인해주세요.", 400),
+    PRODUCT_CONFLICT_OUT_OF_STOCK("P002", "상품의 수량이 부족합니다.", 409),
+
+    //Order
+    ORDER_FAIL_OUT_OF_STOCK("O000", "주문에 실패하였습니다.", 409),
+    ORDER_WRONG_PRODUCT_ID("O001", "주문 처리 중 productId가 잘못되었습니다.", 409)
 
 }

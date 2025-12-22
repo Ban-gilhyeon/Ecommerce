@@ -38,7 +38,8 @@ class AuthService(
             email = request.email,
             password = encodedPassword.toString(),
             name = request.name,
-            role = UserRole.valueOf(request.role)
+            role = UserRole.valueOf(request.role),
+            address = request.address
         )
         userService.saveUser(user)
 
@@ -46,7 +47,8 @@ class AuthService(
         return UserSignUpResponse(
             id = user.id,
             email = user.email,
-            name = user.name
+            name = user.name,
+            address = user.address
         )
     }
 

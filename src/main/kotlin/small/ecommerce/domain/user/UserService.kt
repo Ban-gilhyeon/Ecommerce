@@ -8,10 +8,12 @@ import small.ecommerce.domain.exception.UserException
 class UserService(
     private val userRepository: UserRepository
 ) {
+    //command
     fun saveUser(user:User): User {
         return userRepository.save(user)
     }
 
+    //read
     fun getUserByEmail(email: String): User{
         return userRepository.findUserByEmail(email)
             ?: throw UserException(
@@ -20,6 +22,15 @@ class UserService(
             )
     }
 
+    fun getUserByUserId(userId: Long): User{
+        return userRepository.findUserById(userId)
+            ?:throw UserException(
+                errorCode = ErrorCode.NOT_FOUND_USER_BY_ID,
+                detail = mapOf("userId" to userId)
+            )
+    }
+
+    //validate
     fun existsUserByEmail(email: String):Boolean{
         return userRepository.existsUserByEmail(email)
     }

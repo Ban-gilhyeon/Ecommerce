@@ -8,6 +8,7 @@ import small.ecommerce.domain.Brand.BrandService
 import small.ecommerce.domain.enums.Category
 import small.ecommerce.domain.enums.Gender
 import small.ecommerce.domain.exception.ProductException
+import small.ecommerce.domain.order.dto.ItemInfo
 import small.ecommerce.domain.product.dto.ProductAddRequest
 import small.ecommerce.domain.product.dto.ProductAddResponse
 import small.ecommerce.domain.product.dto.ProductReadInfoResponse
@@ -61,6 +62,46 @@ class ProductService(
     fun readProductListByBrandId(brandId: Long): List<ProductReadInfoResponse>{
         return productRepo.readProductsByBrandId(brandId)
             .map { ProductReadInfoResponse.from(it) }
+    }
+
+    //id 리스트로 상품 리스트 Read
+    fun readProductListByProductIdList(productIdList: List<Long>): List<Product>{
+        val productList = productRepo.findAllById(productIdList)
+        validateProductList(productIdList, productList)
+        return productList
+    }
+
+    fun soldProduct(product: Product, quantity: Int){
+        validateProductOfStock(product,quantity)
+        product.stock -= quantity
+        productRepo.save(product)
+    }
+
+    //상품 재고 확인
+    fun validateProductOfStock(product: Product, quantity: Int){
+        if (product.stock < quantity){
+            throw ProductException(
+                errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
+                detail = mapOf("productId" to product.id,
+                    "requested" to quantity,
+                    "available" to product.stock),
+                message = "해당 상품의 재고가 부족합니다."
+            )
+        }
+    }
+
+    //상품 리스트 확인
+    fun validateProductList(requestIds: List<Long>, products: List<Product>){
+        val foundIds = products.mapNotNull { it.id }.toSet()
+        val missingIds = requestIds - foundIds
+        log.info("missingIds : ", missingIds.toString())
+
+        if(missingIds.isNotEmpty()){
+            throw ProductException(
+                errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
+                detail = mapOf("missingProductIds" to missingIds)
+            )
+        }
     }
 
 }
