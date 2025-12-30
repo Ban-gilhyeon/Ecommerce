@@ -46,9 +46,6 @@ class SecurityConfig (
                     "/api/v1/brand/add"
                 ).hasRole("SELLER")
 
-                //BUYER 전용?
-
-
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
