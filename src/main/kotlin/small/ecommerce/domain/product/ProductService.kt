@@ -72,12 +72,13 @@ class ProductService(
     }
 
     fun soldProduct(product: Product, quantity: Int){
-        productRepo.decreaseStock(product.id, quantity)
+        val updated = productRepo.decreaseStock(product.id, quantity)
+        validateProductOfStock(updated, product)
     }
 
     //상품 재고 확인
-    fun validateProductOfStock(product: Product, quantity: Int){
-        if (product.stock < quantity){
+    fun validateProductOfStock(updated: Int, product: Product){
+        if (updated == 0){
             throw ProductException(
                 errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
                 detail = mapOf("productId" to product.id,
