@@ -72,9 +72,7 @@ class ProductService(
     }
 
     fun soldProduct(product: Product, quantity: Int){
-        validateProductOfStock(product,quantity)
-        product.stock -= quantity
-        productRepo.save(product)
+        productRepo.decreaseStock(product.id, quantity)
     }
 
     //상품 재고 확인

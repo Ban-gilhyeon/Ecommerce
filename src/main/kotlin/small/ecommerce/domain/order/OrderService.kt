@@ -22,7 +22,7 @@ class OrderService(
         val productIds: List<Long> = request.itemInfoList.map { it.productId }
         val products = productService.readProductListByProductIdList(productIds)
 
-         val nowOrder = Order(user = user)
+        val nowOrder = Order(user = user)
 
         //requqest에서 주문수량 뽑기
         val quantityByProductId = mutableMapOf<Long, Int>()
@@ -57,9 +57,6 @@ class OrderService(
             //@TODO 결제 로직이 있으면 수정하기전에 해야되나??
             productService.soldProduct(product, quantity)
         }
-
-
-
         orderRepo.save(nowOrder)
         return OrderResponse.of(nowOrder)
     }
