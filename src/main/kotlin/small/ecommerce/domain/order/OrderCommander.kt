@@ -9,13 +9,13 @@ import small.ecommerce.domain.product.ProductService
 import small.ecommerce.domain.user.UserService
 
 @Service
-class OrderTxService(
+class OrderCommander(
     private val orderRepo: OrderRepository,
     private val userService: UserService,
     private val productService: ProductService,
 ) {
     @Transactional
-    fun createOrderTx(
+    fun createOrderAndCalculateProductStock(
         userId: Long,
         productIds: List<Long>,
         quantityByProductId: Map<Long, Int>,
