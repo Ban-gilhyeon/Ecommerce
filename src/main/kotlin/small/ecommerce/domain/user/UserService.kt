@@ -34,4 +34,8 @@ class UserService(
     fun existsUserByEmail(email: String):Boolean{
         return userRepository.existsUserByEmail(email)
     }
+
+    fun userReference(userId: Long): User{
+        return userRepository.getReferenceById(userId)
+    }
 }

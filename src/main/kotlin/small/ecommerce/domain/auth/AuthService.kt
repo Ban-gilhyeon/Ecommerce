@@ -58,7 +58,7 @@ class AuthService(
 
         //로그인 성공 시 JWT 발급
         val user = userService.getUserByEmail(email)
-        val accessToken: String = jwtTokenProvider.generateAccessToken(user.id)
+        val accessToken: String = jwtTokenProvider.generateAccessToken(user.id, user.role)
         val response: AuthLoginResponse = AuthLoginResponse(
             accessToken = "Bearer "+ accessToken,
             email = user.email

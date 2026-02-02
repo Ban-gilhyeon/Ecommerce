@@ -23,13 +23,7 @@ class ProductService(
     //Create
     fun addProduct(request: ProductAddRequest): ProductAddResponse{
         val brand: Brand = brandService.readBrandById(request.brandId)
-        log.info(request.name)
-        log.info(request.size)
-        log.info(request.category)
-        log.info(request.gender)
-        log.info(request.stock.toString())
-        log.info(request.brandId.toString())
-        log.info(request.price.toString())
+        log.info("add product request log ={}", request)
 
         val product: Product = Product(
             name = request.name,

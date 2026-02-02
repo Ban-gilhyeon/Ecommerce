@@ -6,7 +6,10 @@ import small.ecommerce.domain.BaseTimeEntity
 import small.ecommerce.domain.coupon.CouponIssue
 import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.user.User
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.annotation.OverridingMethodsMustInvokeSuper
+import kotlin.time.Instant
 
 @Entity
 @Table(name = "orders")

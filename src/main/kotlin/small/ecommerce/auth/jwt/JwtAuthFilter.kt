@@ -4,15 +4,17 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import small.ecommerce.auth.UserDetailsService
+import small.ecommerce.domain.auth.dto.UserPrincipal
 
 @Component
 class JwtAuthFilter(
-    private val jwt: JwtTokenProvider,
-    private val userDetailService: UserDetailsService
+    private val jwt: JwtTokenProvider
+
 ): OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -24,14 +26,14 @@ class JwtAuthFilter(
             ?.substring(7)
 
         if(token != null && jwt.validateAccessToken(token)){
-            val userId = jwt.getUserIdFromAccessToken(token)
+            val userPrincipal: UserPrincipal = jwt.getUserPrincipalFromAccessToken(token)
 
-            val userDetails = userDetailService.loadUserById(userId)
+            val authorities = listOf(SimpleGrantedAuthority("${userPrincipal.userRole}"))
 
             val auth = UsernamePasswordAuthenticationToken(
-                userDetails,
+                userPrincipal,
                 null,
-                userDetails.authorities
+                authorities
             )
             SecurityContextHolder.getContext().authentication = auth
         }

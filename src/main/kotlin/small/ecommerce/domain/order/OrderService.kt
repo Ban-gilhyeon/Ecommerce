@@ -1,8 +1,10 @@
 package small.ecommerce.domain.order
 
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import org.springframework.dao.CannotAcquireLockException
+import org.springframework.dao.PessimisticLockingFailureException
 import small.ecommerce.common.exception.ErrorCode
+import small.ecommerce.domain.auth.dto.UserPrincipal
 import small.ecommerce.domain.exception.OrderException
 import small.ecommerce.domain.order.dto.OrderRequest
 import small.ecommerce.domain.order.dto.OrderResponse
@@ -12,19 +14,12 @@ import small.ecommerce.domain.user.UserService
 
 @Service
 class OrderService(
-    private val orderRepo: OrderRepository,
-    private val userService: UserService,
-    private val productService: ProductService,
+    private val orderTxService: OrderTxService,
 ) {
-    @Transactional
-    fun createOrder(user: User, request: OrderRequest): OrderResponse{
-        //reqeust의 itemInfo에서 product
+    fun createOrder(userPrincipal: UserPrincipal, request: OrderRequest): OrderResponse{
         val productIds: List<Long> = request.itemInfoList.map { it.productId }
-        val products = productService.readProductListByProductIdList(productIds)
 
-        val nowOrder = Order(user = user)
-
-        //requqest에서 주문수량 뽑기
+        // request에서 주문 수량 합산만 선처리
         val quantityByProductId = mutableMapOf<Long, Int>()
         for(itemInfo in request.itemInfoList){
             val productId = itemInfo.productId
@@ -32,32 +27,38 @@ class OrderService(
             quantityByProductId[productId] = ( quantityByProductId[productId] ?: 0 ) + quantity
         }
 
-        // product의 stock - quantity  진행
-        for(product in products){
-            val productId = product.id
-                ?: throw OrderException(
-                    errorCode = ErrorCode.ORDER_WRONG_PRODUCT_ID,
-                    detail = mapOf("id" to product.id)
-                )
-
-            val quantity = quantityByProductId[productId]
-                ?: throw OrderException(
-                    errorCode = ErrorCode.ORDER_FAIL_OUT_OF_STOCK,
-                    detail = mapOf("quantity" to quantityByProductId[productId])
-                )
-
-            nowOrder.orderItem.add(
-                OrderItem(
-                    order = nowOrder,
-                    product = product,
-                    quantity = quantity,
-                    couponIssueId = null,
-                )
+        return retryOnLock {
+            orderTxService.createOrderTx(
+                userId = userPrincipal.userId,
+                productIds = productIds,
+                quantityByProductId = quantityByProductId,
             )
-            //@TODO 결제 로직이 있으면 수정하기전에 해야되나??
-            productService.soldProduct(product, quantity)
         }
-        orderRepo.save(nowOrder)
-        return OrderResponse.of(nowOrder)
+    }
+
+    private fun <T> retryOnLock(
+        maxAttempts: Int = 3,
+        initialBackoffMs: Long = 50,
+        block: () -> T,
+    ): T {
+        var attempt = 1
+        var backoff = initialBackoffMs
+        while (true) {
+            try {
+                return block()
+            } catch (e: CannotAcquireLockException) {
+                if (attempt >= maxAttempts) throw e
+            } catch (e: PessimisticLockingFailureException) {
+                if (attempt >= maxAttempts) throw e
+            }
+            try {
+                Thread.sleep(backoff)
+            } catch (ie: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw RuntimeException("Interrupted during lock-retry backoff", ie)
+            }
+            attempt += 1
+            backoff *= 2
+        }
     }
 }

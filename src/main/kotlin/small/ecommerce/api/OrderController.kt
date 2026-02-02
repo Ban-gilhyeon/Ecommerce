@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import small.ecommerce.auth.CustomUserDetails
+import small.ecommerce.domain.auth.dto.UserPrincipal
 import small.ecommerce.domain.order.OrderService
 import small.ecommerce.domain.order.dto.OrderRequest
 import small.ecommerce.domain.order.dto.OrderResponse
@@ -22,9 +23,9 @@ class OrderController(
 
     @PostMapping
     fun addOrder(
-        @AuthenticationPrincipal userDetails: CustomUserDetails,
+        @AuthenticationPrincipal userPrincipal: UserPrincipal,
         @Valid @RequestBody request: OrderRequest
     ): ResponseEntity<OrderResponse>{
-        return ResponseEntity.ok(orderService.createOrder(userDetails.getUser(), request))
+        return ResponseEntity.ok(orderService.createOrder(userPrincipal, request))
     }
 }
