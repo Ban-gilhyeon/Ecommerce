@@ -1,20 +1,15 @@
 package small.ecommerce.domain.order
 
-import org.springframework.stereotype.Service
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.PessimisticLockingFailureException
-import small.ecommerce.common.exception.ErrorCode
+import org.springframework.stereotype.Service
 import small.ecommerce.domain.auth.dto.UserPrincipal
-import small.ecommerce.domain.exception.OrderException
 import small.ecommerce.domain.order.dto.OrderRequest
 import small.ecommerce.domain.order.dto.OrderResponse
-import small.ecommerce.domain.product.ProductService
-import small.ecommerce.domain.user.User
-import small.ecommerce.domain.user.UserService
 
 @Service
 class OrderService(
-    private val orderTxService: OrderTxService,
+    private val orderCommander: OrderCommander,
 ) {
     fun createOrder(userPrincipal: UserPrincipal, request: OrderRequest): OrderResponse{
         val productIds: List<Long> = request.itemInfoList.map { it.productId }
@@ -28,7 +23,7 @@ class OrderService(
         }
 
         return retryOnLock {
-            orderTxService.createOrderTx(
+            orderCommander.createOrderAndCalculateProductStock(
                 userId = userPrincipal.userId,
                 productIds = productIds,
                 quantityByProductId = quantityByProductId,
