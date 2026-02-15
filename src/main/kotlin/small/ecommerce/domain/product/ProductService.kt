@@ -65,19 +65,24 @@ class ProductService(
         return productList
     }
 
-    fun soldProduct(product: Product, quantity: Int){
-        val updated = productRepo.decreaseStock(product.id, quantity)
-        validateProductOfStock(updated, product, quantity)
+    fun productReference(productId: Long): Product {
+        return productRepo.getReferenceById(productId)
+    }
+
+    fun soldProduct(productId: Long, quantity: Int){
+        val updated = productRepo.decreaseStock(productId, quantity)
+        validateProductOfStock(updated, productId, quantity)
     }
 
     //상품 재고 확인
-    fun validateProductOfStock(updated: Int, product: Product, quantity: Int){
+    fun validateProductOfStock(updated: Int, productId: Long, quantity: Int){
         if (updated == 0){
             throw ProductException(
                 errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
-                detail = mapOf("productId" to product.id,
+                detail = mapOf(
+                    "productId" to productId,
                     "requested" to quantity,
-                    "available" to product.stock),
+                ),
                 message = "해당 상품의 재고가 부족합니다."
             )
         }

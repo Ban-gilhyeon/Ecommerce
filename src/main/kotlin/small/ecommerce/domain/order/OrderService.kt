@@ -6,11 +6,16 @@ import org.springframework.stereotype.Service
 import small.ecommerce.domain.auth.dto.UserPrincipal
 import small.ecommerce.domain.order.dto.OrderRequest
 import small.ecommerce.domain.order.dto.OrderResponse
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.Semaphore
 
 @Service
 class OrderService(
     private val orderCommander: OrderCommander,
 ) {
+    private val productBulkheads = ConcurrentHashMap<Long, Semaphore>()
+    private val maxConcurrentOrdersPerProduct = 5
+
     fun createOrder(userPrincipal: UserPrincipal, request: OrderRequest): OrderResponse{
         val productIds: List<Long> = request.itemInfoList.map { it.productId }
 
@@ -22,12 +27,35 @@ class OrderService(
             quantityByProductId[productId] = ( quantityByProductId[productId] ?: 0 ) + quantity
         }
 
-        return retryOnLock {
-            orderCommander.createOrderAndCalculateProductStock(
-                userId = userPrincipal.userId,
-                productIds = productIds,
-                quantityByProductId = quantityByProductId,
-            )
+        return withProductBulkhead(productIds) {
+            retryOnLock {
+                orderCommander.createOrderAndCalculateProductStock(
+                    userId = userPrincipal.userId,
+                    productIds = productIds,
+                    quantityByProductId = quantityByProductId,
+                )
+            }
+        }
+    }
+
+    private fun withProductBulkhead(productIds: List<Long>, block: () -> OrderResponse): OrderResponse {
+        val uniqueSortedProductIds = productIds.toSet().sorted()
+        val acquiredSemaphores = mutableListOf<Semaphore>()
+
+        try {
+            for (productId in uniqueSortedProductIds) {
+                val semaphore = productBulkheads.computeIfAbsent(productId) {
+                    Semaphore(maxConcurrentOrdersPerProduct, true)
+                }
+                semaphore.acquire()
+                acquiredSemaphores.add(semaphore)
+            }
+            return block()
+        } catch (e: InterruptedException) {
+            Thread.currentThread().interrupt()
+            throw RuntimeException("주문 동시성 제어 중 인터럽트가 발생했습니다.", e)
+        } finally {
+            acquiredSemaphores.asReversed().forEach { it.release() }
         }
     }
 
