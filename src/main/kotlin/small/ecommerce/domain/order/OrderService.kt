@@ -1,5 +1,6 @@
 package small.ecommerce.domain.order
 
+import org.slf4j.LoggerFactory
 import org.springframework.dao.CannotAcquireLockException
 import org.springframework.dao.PessimisticLockingFailureException
 import org.springframework.stereotype.Service
@@ -13,11 +14,18 @@ import java.util.concurrent.Semaphore
 class OrderService(
     private val orderCommander: OrderCommander,
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
     private val productBulkheads = ConcurrentHashMap<Long, Semaphore>()
     private val maxConcurrentOrdersPerProduct = 5
 
     fun createOrder(userPrincipal: UserPrincipal, request: OrderRequest): OrderResponse{
         val productIds: List<Long> = request.itemInfoList.map { it.productId }
+        log.info(
+            "order create requested userId={}, itemCount={}, productCount={}",
+            userPrincipal.userId,
+            request.itemInfoList.size,
+            productIds.toSet().size,
+        )
 
         // request에서 주문 수량 합산만 선처리
         val quantityByProductId = mutableMapOf<Long, Int>()
@@ -27,7 +35,7 @@ class OrderService(
             quantityByProductId[productId] = ( quantityByProductId[productId] ?: 0 ) + quantity
         }
 
-        return withProductBulkhead(productIds) {
+        val response = withProductBulkhead(productIds) {
             retryOnLock {
                 orderCommander.createOrderAndCalculateProductStock(
                     userId = userPrincipal.userId,
@@ -36,6 +44,13 @@ class OrderService(
                 )
             }
         }
+        log.info(
+            "order create completed userId={}, orderId={}, status={}",
+            userPrincipal.userId,
+            response.orderId,
+            response.status,
+        )
+        return response
     }
 
     private fun withProductBulkhead(productIds: List<Long>, block: () -> OrderResponse): OrderResponse {

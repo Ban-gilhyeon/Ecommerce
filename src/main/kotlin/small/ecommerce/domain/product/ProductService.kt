@@ -16,7 +16,8 @@ import small.ecommerce.domain.product.dto.ProductReadInfoResponse
 @Service
 class ProductService(
     private val productRepo: ProductRepository,
-    private val brandService: BrandService
+    private val brandService: BrandService,
+    private val productStockRepo: ProductStockRepository,
 ) {
     private val log = LoggerFactory.getLogger(this.javaClass)
 
@@ -36,7 +37,13 @@ class ProductService(
             )
         log.info("domain: product create")
         productRepo.save(product)
-        return ProductAddResponse.of(product)
+        productStockRepo.save(
+            ProductStock(
+                productId = product.id,
+                availableStock = request.stock,
+            )
+        )
+        return ProductAddResponse.of(product, request.stock)
     }
 
     //Read
@@ -48,14 +55,21 @@ class ProductService(
                 detail = mapOf("id" to id)
             )
         }
-        return ProductReadInfoResponse.from(product)
+        val stock = readStockByProductId(product.id)
+        return ProductReadInfoResponse.from(product, stock)
 
     }
 
     //해당 브랜드의 모든 product Read
     fun readProductListByBrandId(brandId: Long): List<ProductReadInfoResponse>{
-        return productRepo.readProductsByBrandId(brandId)
-            .map { ProductReadInfoResponse.from(it) }
+        val products = productRepo.readProductsByBrandId(brandId)
+        val stockByProductId = readStockMapByProductIds(products.map { it.id })
+        return products.map {
+            ProductReadInfoResponse.from(
+                product = it,
+                stock = stockByProductId[it.id] ?: 0,
+            )
+        }
     }
 
     //id 리스트로 상품 리스트 Read
@@ -70,8 +84,30 @@ class ProductService(
     }
 
     fun soldProduct(productId: Long, quantity: Int){
-        val updated = productRepo.decreaseStock(productId, quantity)
+        log.info("stock decrease requested productId={}, quantity={}", productId, quantity)
+        val updated = productStockRepo.decreaseStock(productId, quantity)
         validateProductOfStock(updated, productId, quantity)
+        log.info("stock decrease completed productId={}, quantity={}", productId, quantity)
+    }
+
+    private fun readStockByProductId(productId: Long): Int {
+        return productStockRepo.findById(productId)
+            .orElseThrow {
+                ProductException(
+                    errorCode = ErrorCode.PRODUCT_NOT_FOUND_PRODUCT_BY_ID,
+                    detail = mapOf("id" to productId),
+                    message = "해당 상품의 재고 정보를 찾을 수 없습니다.",
+                )
+            }
+            .availableStock
+    }
+
+    private fun readStockMapByProductIds(productIds: List<Long>): Map<Long, Int> {
+        if (productIds.isEmpty()) {
+            return emptyMap()
+        }
+        return productStockRepo.findAllByProductIdIn(productIds)
+            .associate { it.productId to it.availableStock }
     }
 
     //상품 재고 확인

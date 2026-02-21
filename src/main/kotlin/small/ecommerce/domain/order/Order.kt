@@ -1,15 +1,8 @@
 package small.ecommerce.domain.order
 
 import jakarta.persistence.*
-import org.apache.catalina.mbeans.UserMBean
 import small.ecommerce.domain.BaseTimeEntity
-import small.ecommerce.domain.coupon.CouponIssue
-import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.user.User
-import java.time.LocalDateTime
-import java.time.ZoneId
-import javax.annotation.OverridingMethodsMustInvokeSuper
-import kotlin.time.Instant
 
 @Entity
 @Table(name = "orders")
@@ -39,9 +32,13 @@ class Order(
         }
     }
 
-    // 결제가 추가되면 필요한 응답 넣어주기
-    //결제를 완료한 경우
-    fun pay(order:Order) {
-        order.status = OrderStatus.PROCESSING
+    // 결제 승인 이후 주문 상태를 처리중으로 전이한다.
+    fun markPaymentApproved() {
+        status = OrderStatus.PROCESSING
+    }
+
+    // 결제가 거절되면 주문 상태를 실패로 전이한다.
+    fun markPaymentFailed() {
+        status = OrderStatus.FAILED
     }
 }

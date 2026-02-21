@@ -15,12 +15,12 @@ data class ProductAddResponse(
     val brandId: Long
 ) {
     companion object{
-        fun of(product: Product): ProductAddResponse =
+        fun of(product: Product, stock: Int): ProductAddResponse =
             ProductAddResponse(
                 name = product.name,
                 price = product.price,
                 brandId = product.brand.id,
-                stock = product.stock,
+                stock = stock,
                 size = product.size,
                 category = product.category,
                 gender = product.gender

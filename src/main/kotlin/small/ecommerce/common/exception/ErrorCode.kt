@@ -44,6 +44,13 @@ enum class ErrorCode(
 
     //Order
     ORDER_FAIL_OUT_OF_STOCK("O000", "주문에 실패하였습니다.", 409),
-    ORDER_WRONG_PRODUCT_ID("O001", "주문 처리 중 productId가 잘못되었습니다.", 409)
+    ORDER_WRONG_PRODUCT_ID("O001", "주문 처리 중 productId가 잘못되었습니다.", 409),
+
+    //Payment
+    PAYMENT_ORDER_NOT_FOUND("M000", "결제할 주문을 찾을 수 없습니다.", 404),
+    PAYMENT_ALREADY_PROCESSED("M001", "이미 결제가 처리된 주문입니다.", 409),
+    PAYMENT_DUPLICATE("M002", "이미 결제 이력이 존재합니다.", 409),
+    PAYMENT_INVALID_AMOUNT("M003", "결제 금액이 올바르지 않습니다.", 400),
+    PAYMENT_PROVIDER_NOT_SUPPORTED("M004", "지원하지 않는 PG사입니다.", 400)
 
 }

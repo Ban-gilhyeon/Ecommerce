@@ -25,6 +25,8 @@ import small.ecommerce.domain.enums.Category
 import small.ecommerce.domain.enums.Gender
 import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.product.ProductRepository
+import small.ecommerce.domain.product.ProductStock
+import small.ecommerce.domain.product.ProductStockRepository
 import small.ecommerce.domain.product.ProductSize
 import small.ecommerce.domain.user.User
 import small.ecommerce.domain.user.UserRepository
@@ -57,6 +59,9 @@ class OrderConcurrencyTest {
 
     @Autowired
     private lateinit var productRepository: ProductRepository
+
+    @Autowired
+    private lateinit var productStockRepository: ProductStockRepository
 
     private var productId: Long = 0L
 
@@ -112,6 +117,12 @@ class OrderConcurrencyTest {
 
         // GIVEN: 테스트에서 사용할 상품 ID와 인증 토큰을 준비한다.
         productId = product.id
+        productStockRepository.save(
+            ProductStock(
+                productId = productId,
+                availableStock = 10000,
+            )
+        )
         testAuthentication = UsernamePasswordAuthenticationToken(
             small.ecommerce.domain.auth.dto.UserPrincipal.from(buyer.id, buyer.role),
             null,
@@ -205,7 +216,7 @@ class OrderConcurrencyTest {
         assertEquals(concurrency, successCount.get(), "성공 요청 수가 기대값과 다름. elapsedMs=$elapsedMs")
 
         // THEN: 재고는 동시 주문 수만큼 정확히 차감되어야 한다.
-        val finalStock = productRepository.findById(productId).orElseThrow().stock
+        val finalStock = productStockRepository.findById(productId).orElseThrow().availableStock
         assertEquals(10000 - concurrency, finalStock, "최종 재고가 기대값과 다름")
 
         // THEN: 타임아웃/락 획득 실패 유형의 오류가 없어야 한다.

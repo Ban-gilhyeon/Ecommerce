@@ -1,6 +1,7 @@
 package small.ecommerce.domain.order
 
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import small.ecommerce.domain.order.dto.OrderResponse
 import small.ecommerce.domain.product.ProductService
@@ -12,12 +13,20 @@ class OrderCommander(
     private val userService: UserService,
     private val productService: ProductService,
 ) {
+    private val log = LoggerFactory.getLogger(this.javaClass)
+
     @Transactional
     fun createOrderAndCalculateProductStock(
         userId: Long,
         productIds: List<Long>,
         quantityByProductId: Map<Long, Int>,
     ): OrderResponse {
+        log.info(
+            "order command start userId={}, requestedProducts={}, mergedProducts={}",
+            userId,
+            productIds.size,
+            quantityByProductId.size,
+        )
         val user = userService.getUserByUserId(userId)
         val nowOrder = Order(user = user)
 
@@ -33,7 +42,12 @@ class OrderCommander(
             nowOrder.orderItem.add(
                 OrderItem(
                     order = nowOrder,
-                    product = product,
+                    productId = product.id,
+                    productName = product.name,
+                    productPrice = product.price,
+                    productCategory = product.category,
+                    productGender = product.gender,
+                    productSize = product.size,
                     quantity = quantity,
                     couponIssueId = null,
                 )
@@ -42,6 +56,12 @@ class OrderCommander(
         }
 
         orderRepo.save(nowOrder)
+        log.info(
+            "order command success userId={}, orderId={}, itemCount={}",
+            userId,
+            nowOrder.id,
+            nowOrder.orderItem.size,
+        )
         return OrderResponse.of(nowOrder)
     }
 }

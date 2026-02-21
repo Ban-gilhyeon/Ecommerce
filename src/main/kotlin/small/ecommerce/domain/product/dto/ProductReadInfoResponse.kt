@@ -16,7 +16,7 @@ data class ProductReadInfoResponse(
     val brandId: Long,
 ) {
     companion object{
-        fun from(product: Product): ProductReadInfoResponse{
+        fun from(product: Product, stock: Int): ProductReadInfoResponse{
             return ProductReadInfoResponse(
                 id = product.id,
                 name = product.name,
@@ -24,7 +24,7 @@ data class ProductReadInfoResponse(
                 category = product.category,
                 gender = product.gender,
                 price = product.price,
-                stock = product.stock,
+                stock = stock,
                 brandId = product.brand.id
             )
         }

@@ -16,13 +16,13 @@ data class ProductReadOneProductResponse(
     val size: ProductSize
 ) {
     companion object{
-        fun from(product: Product) =
+        fun from(product: Product, stock: Int) =
             ProductReadOneProductResponse(
                 id = product.id,
                 name = product.name,
                 price = product.price,
                 brandName = product.brand.name,
-                stock = product.stock,
+                stock = stock,
                 category = product.category,
                 gender = product.gender,
                 size = product.size
