@@ -18,18 +18,22 @@ class OrderCommander(
         productIds: List<Long>,
         quantityByProductId: Map<Long, Int>,
     ): OrderResponse {
-        val userReference = userService.userReference(userId)
-        val nowOrder = Order(user = userReference)
+        val user = userService.getUserByUserId(userId)
+        val nowOrder = Order(user = user)
 
         val uniqueProductIds = productIds.toSet().sorted()
+        val productsById = productService.readProductListByProductIdList(uniqueProductIds)
+            .associateBy { it.id }
+
         for (productId in uniqueProductIds) {
             val quantity = quantityByProductId[productId] ?: continue
-            val productReference = productService.productReference(productId)
+            val product = productsById[productId]
+                ?: continue
 
             nowOrder.orderItem.add(
                 OrderItem(
                     order = nowOrder,
-                    product = productReference,
+                    product = product,
                     quantity = quantity,
                     couponIssueId = null,
                 )
