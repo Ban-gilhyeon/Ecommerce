@@ -1,15 +1,29 @@
 package small.ecommerce.domain.order.dto
 
-import org.hibernate.cache.spi.support.AbstractReadWriteAccess.Item
+import small.ecommerce.domain.order.OrderStatus
+import small.ecommerce.domain.product.ProductSize
+import java.math.BigDecimal
 
-data class OrderRequest(
-    val itemInfoList: List<ItemInfo>,
-) {
-}
 
-data class ItemInfo(
-    val productId: Long,
-    val quantity: Int,
-    val couponIssueId: Long?,
-){
+sealed class  OrderRequest{
+
+    data class CreateOrder(
+        val orderInfo: OrderInfo,
+        val orderItems: List<OrderItem>,
+    )
+
+    data class OrderItem(
+        val productId: Long,
+        val productName: String,
+        val productPrice: BigDecimal,
+        val productSize: ProductSize,
+        val productQuantity: Int,
+    )
+
+    data class OrderInfo(
+        val orderId: Long,
+        val customerId: Long,
+        val customerAdd: String,
+        val orderStatus: OrderStatus,
+    )
 }

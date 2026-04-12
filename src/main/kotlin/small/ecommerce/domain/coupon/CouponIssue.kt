@@ -5,19 +5,19 @@ import small.ecommerce.domain.BaseTimeEntity
 import small.ecommerce.domain.user.User
 
 @Entity
-@Table(name = "ConponIssues")
+@Table(name = "coupon_issues")
 class CouponIssue(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", unique = true)
-    val user: User,
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id", unique = true)
-    val coupon: Coupon
+    @JoinColumn(name = "coupon_id", nullable = false)
+    var coupon: Coupon
 
 ): BaseTimeEntity() {
 }

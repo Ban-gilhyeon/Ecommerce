@@ -1,4 +1,4 @@
-package small.ecommerce.domain.Brand
+package small.ecommerce.domain.brand
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository

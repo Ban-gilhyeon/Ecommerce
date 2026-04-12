@@ -1,10 +1,7 @@
 package small.ecommerce.domain.user
 
 import jakarta.persistence.*
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
 import small.ecommerce.domain.BaseTimeEntity
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "users")
@@ -14,20 +11,20 @@ class User(
     val id: Long = 0,
 
     @Column(nullable = false, unique = true)
-    val email: String,
+    var email: String,
 
     @Column(nullable = false)
-    val password: String,
+    var password: String,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String,
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val role: UserRole,
+    var role: UserRole,
 
     @Column(nullable = false)
-    val address: String,
+    var address: String,
 
 ): BaseTimeEntity(){
 

@@ -1,4 +1,4 @@
-package small.ecommerce.domain.Brand
+package small.ecommerce.domain.brand
 
 import jakarta.persistence.*
 import small.ecommerce.domain.BaseTimeEntity
@@ -13,14 +13,14 @@ class Brand(
     val id: Long = 0L,
 
     @Column(nullable = false, unique = true)
-    val name: String,
+    var name: String,
 
     @Column(nullable = true)
-    val description: String? = null,
+    var description: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
-    val owner: User
+    var owner: User
 
 ): BaseTimeEntity() {
 }

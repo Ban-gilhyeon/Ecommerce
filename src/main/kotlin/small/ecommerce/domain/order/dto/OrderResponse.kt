@@ -1,58 +1,39 @@
 package small.ecommerce.domain.order.dto
 
-import small.ecommerce.domain.enums.Category
-import small.ecommerce.domain.enums.Gender
-import small.ecommerce.domain.order.Order
 import small.ecommerce.domain.order.OrderItem
 import small.ecommerce.domain.order.OrderStatus
-import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.product.ProductSize
-import small.ecommerce.domain.user.User
+import java.math.BigDecimal
 
-data class OrderResponse(
+sealed class OrderResponse {
+    data class CreateOrder(
+        val orderInfo: OrderInfo,
+        val totalAmount: BigDecimal,
+        val orderItems: List<OrderItem>,
+    )
+    data class OrderInfo(
+        val orderId: Long,
+        val customerId: Long,
+        val customerAdd: String,
 
-    val orderId: Long,
-    val userId: Long,
-    val userName: String,
-    val userAddress: String,
-    val orderItemsResponse: List<OrderItemResponse>,
-    val status: OrderStatus
+        //todo : 결제 로직 추가 시 nullable = false
+        val paymentInfo: PaymentInfo? = null,
+    )
 
-) {
-    companion object{
-        fun of(order: Order): OrderResponse{
-            var orderItemResponses =  mutableListOf<OrderItemResponse>()
-            for(productInfo in order.orderItem){
-                val orderItemResponse = OrderItemResponse(
-                    productId = productInfo.product.id,
-                    productName = productInfo.product.name,
-                    productCategory = productInfo.product.category,
-                    productGender = productInfo.product.gender,
-                    productPrice = productInfo.product.price,
-                    productSize = productInfo.product.size
-                )
-                orderItemResponses.add(orderItemResponse)
-            }
-            val response = OrderResponse(
-                orderId = order.id,
-                userId =order.user.id,
-                userName = order.user.name,
-                userAddress = order.user.address,
-                orderItemsResponse = orderItemResponses,
-                status = order.status
-            )
-            return response
-        }
-    }
-
-    data class OrderItemResponse(
+    data class OrderItem(
+        val brandId: Long,
+        val brandName: String,
         val productId: Long,
         val productName: String,
-        val productPrice: Int,
-        val productCategory: Category,
-        val productGender: Gender,
+        val productPrice: BigDecimal,
         val productSize: ProductSize,
+        val productQuantity: Int,
+        val orderStatus: OrderStatus,
+    )
 
-
-    ){}
+    //구현 전
+    data class PaymentInfo(
+        val cardNumber: String? = null,
+        val cardCompany: String? = null,
+    )
 }

@@ -10,23 +10,24 @@ import java.time.LocalDateTime
 class Coupon(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
+    val id: Long = 0,
 
     @Column(nullable = false)
-    val name: String,
+    var name: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    var category: Category,
 
     @Column(nullable = true)
-    val category: Category,
-
-    @Column(nullable = true)
-    val expirationTime: LocalDateTime, // 쿠폰 유효 기간
+    var expirationTime: LocalDateTime, // 쿠폰 유효 기간
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val discountType:DiscountType,
+    var discountType:DiscountType,
 
     @Column(nullable = false)
-    val discountValue: Long
+    var discountValue: Long
 
 ): BaseTimeEntity() {
 }

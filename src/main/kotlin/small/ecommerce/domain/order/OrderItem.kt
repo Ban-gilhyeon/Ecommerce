@@ -1,8 +1,6 @@
 package small.ecommerce.domain.order
 
 import jakarta.persistence.*
-import small.ecommerce.domain.coupon.CouponIssue
-import small.ecommerce.domain.product.Product
 
 @Entity
 class OrderItem(
@@ -12,21 +10,9 @@ class OrderItem(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    val order: Order,
+    var order: Order? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    val product: Product,
-
-    val quantity: Int,
-
-    val couponIssueId: Long? = null
+    @Column(nullable = false)
+    val productId: Long,
 ) {
-    /*companion object{
-        fun from(product: Product, quantity: Int): OrderItem{
-            return OrderItem(
-
-            )
-        }
-    }*/
 }

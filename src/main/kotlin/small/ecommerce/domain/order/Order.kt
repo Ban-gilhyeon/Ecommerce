@@ -1,12 +1,8 @@
 package small.ecommerce.domain.order
 
 import jakarta.persistence.*
-import org.apache.catalina.mbeans.UserMBean
 import small.ecommerce.domain.BaseTimeEntity
-import small.ecommerce.domain.coupon.CouponIssue
-import small.ecommerce.domain.product.Product
 import small.ecommerce.domain.user.User
-import javax.annotation.OverridingMethodsMustInvokeSuper
 
 @Entity
 @Table(name = "orders")
@@ -29,10 +25,12 @@ class Order(
     ): BaseTimeEntity(){
     companion object {
         fun from(user: User, orderItems: MutableList<OrderItem>): Order {
-            return Order(
+            val order = Order(
                 user = user,
                 orderItem = orderItems,
             )
+            orderItems.forEach { it.order = order }
+            return order
         }
     }
 

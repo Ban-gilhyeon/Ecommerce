@@ -11,8 +11,8 @@ import small.ecommerce.domain.auth.AuthService
 import small.ecommerce.domain.auth.dto.AuthLoginRequest
 import small.ecommerce.domain.auth.dto.AuthLoginResponse
 import small.ecommerce.domain.user.UserService
-import small.ecommerce.domain.user.dto.UserSignUpRequest
-import small.ecommerce.domain.user.dto.UserSignUpResponse
+import small.ecommerce.domain.user.dto.UserRequest
+import small.ecommerce.domain.user.dto.UserResponse
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -25,7 +25,7 @@ class AuthController(
 
 
     @PostMapping("/signup")
-    fun signUp(@Valid @RequestBody request: UserSignUpRequest): ResponseEntity<UserSignUpResponse>{
+    fun signUp(@Valid @RequestBody request: UserRequest.Create): ResponseEntity<UserResponse.Create>{
         val response = authService.SignUp(request)
         return ResponseEntity.ok(response)
     }

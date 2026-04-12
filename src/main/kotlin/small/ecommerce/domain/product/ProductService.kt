@@ -1,106 +1,121 @@
 package small.ecommerce.domain.product
 
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import small.ecommerce.common.exception.ErrorCode
-import small.ecommerce.domain.Brand.Brand
-import small.ecommerce.domain.Brand.BrandService
-import small.ecommerce.domain.enums.Category
-import small.ecommerce.domain.enums.Gender
+import small.ecommerce.domain.brand.BrandService
 import small.ecommerce.domain.exception.ProductException
-import small.ecommerce.domain.order.dto.ItemInfo
-import small.ecommerce.domain.product.dto.ProductAddRequest
-import small.ecommerce.domain.product.dto.ProductAddResponse
-import small.ecommerce.domain.product.dto.ProductReadInfoResponse
+import small.ecommerce.domain.product.dto.ProductRequest
 
 @Service
 class ProductService(
     private val productRepo: ProductRepository,
+    private val productStockRepository: ProductStockRepository,
     private val brandService: BrandService
 ) {
-    private val log = LoggerFactory.getLogger(this.javaClass)
+    fun createProduct(request: ProductRequest.CreateProduct): Product {
+        brandService.readBrandById(request.brandId)
 
-    //Create
-    fun addProduct(request: ProductAddRequest): ProductAddResponse{
-        val brand: Brand = brandService.readBrandById(request.brandId)
-        log.info(request.name)
-        log.info(request.size)
-        log.info(request.category)
-        log.info(request.gender)
-        log.info(request.stock.toString())
-        log.info(request.brandId.toString())
-        log.info(request.price.toString())
-
-        val product: Product = Product(
-            name = request.name,
-            price = request.price,
-            brand = brand,
-            stock = request.stock,
-            category = Category.from(request.category),
-            gender = Gender.from(request.gender),
-            size = ProductSize.from(request.size)
+        return productRepo.save(
+            Product(
+                brandId = request.brandId,
+                stockId = request.stockId,
+                name = request.name,
+                price = request.price,
+                category = request.category,
+                gender = request.gender,
             )
-        log.info("domain: product create")
-        productRepo.save(product)
-        return ProductAddResponse.of(product)
+        )
     }
 
-    //Read
-    //productId로 하나 Read
-    fun readProductByProductId(id: Long): ProductReadInfoResponse {
-        val  product = productRepo.findById(id).orElseThrow {
-            ProductException(
-                errorCode = ErrorCode.PRODUCT_NOT_FOUND_PRODUCT_BY_ID,
-                detail = mapOf("id" to id)
-            )
-        }
-        return ProductReadInfoResponse.from(product)
-
+    fun readProducts(): List<Product> {
+        return productRepo.findAll()
     }
 
-    //해당 브랜드의 모든 product Read
-    fun readProductListByBrandId(brandId: Long): List<ProductReadInfoResponse>{
+    fun readProductById(productId: Long): Product {
+        return productRepo.findById(productId)
+            .orElseThrow {
+                ProductException(
+                    errorCode = ErrorCode.PRODUCT_NOT_FOUND_PRODUCT_BY_ID,
+                    detail = mapOf("productId" to productId)
+                )
+            }
+    }
+
+    fun readProductsByBrandId(brandId: Long): List<Product> {
+        brandService.readBrandById(brandId)
         return productRepo.readProductsByBrandId(brandId)
-            .map { ProductReadInfoResponse.from(it) }
     }
 
-    //id 리스트로 상품 리스트 Read
-    fun readProductListByProductIdList(productIdList: List<Long>): List<Product>{
-        val productList = productRepo.findAllById(productIdList)
-        validateProductList(productIdList, productList)
-        return productList
-    }
+    fun updateProduct(productId: Long, request: ProductRequest.UpdateProduct): Product {
+        val product = readProductById(productId)
 
-    fun soldProduct(product: Product, quantity: Int){
-        val updated = productRepo.decreaseStock(product.id, quantity)
-        validateProductOfStock(updated, product, quantity)
-    }
-
-    //상품 재고 확인
-    fun validateProductOfStock(updated: Int, product: Product, quantity: Int){
-        if (updated == 0){
-            throw ProductException(
-                errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
-                detail = mapOf("productId" to product.id,
-                    "requested" to quantity,
-                    "available" to product.stock),
-                message = "해당 상품의 재고가 부족합니다."
-            )
+        request.brandId?.let {
+            brandService.readBrandById(it)
+            product.brandId = it
         }
+        request.stockId?.let { product.stockId = it }
+        request.name?.let { product.name = it }
+        request.price?.let { product.price = it }
+        request.category?.let { product.category = it }
+        request.gender?.let { product.gender = it }
+
+        return productRepo.save(product)
     }
 
-    //상품 리스트 확인
-    fun validateProductList(requestIds: List<Long>, products: List<Product>){
-        val foundIds = products.mapNotNull { it.id }.toSet()
-        val missingIds = requestIds - foundIds
-        log.info("missingIds : ", missingIds.toString())
+    fun deleteProduct(productId: Long) {
+        val product = readProductById(productId)
+        productRepo.delete(product)
+    }
 
-        if(missingIds.isNotEmpty()){
-            throw ProductException(
-                errorCode = ErrorCode.PRODUCT_CONFLICT_OUT_OF_STOCK,
-                detail = mapOf("missingProductIds" to missingIds)
+    fun createProductStock(request: ProductRequest.CreateProductStock): ProductStock {
+        readProductById(request.productId)
+
+        return productStockRepository.save(
+            ProductStock(
+                productId = request.productId,
+                size = request.size,
+                color = request.color,
+                quantity = request.quantity,
             )
-        }
+        )
     }
 
+    fun readProductStocks(): List<ProductStock> {
+        return productStockRepository.findAll()
+    }
+
+    fun readProductStockById(stockId: Long): ProductStock {
+        return productStockRepository.findById(stockId)
+            .orElseThrow {
+                ProductException(
+                    errorCode = ErrorCode.PRODUCT_INVALID_PRODUCT_ID,
+                    detail = mapOf("stockId" to stockId),
+                    message = "상품 재고를 찾을 수 없습니다."
+                )
+            }
+    }
+
+    fun readProductStocksByProductId(productId: Long): List<ProductStock> {
+        readProductById(productId)
+        return productStockRepository.findAllByProductId(productId)
+    }
+
+    fun updateProductStock(stockId: Long, request: ProductRequest.UpdateProductStock): ProductStock {
+        val stock = readProductStockById(stockId)
+
+        request.productId?.let {
+            readProductById(it)
+            stock.productId = it
+        }
+        request.size?.let { stock.size = it }
+        request.color?.let { stock.color = it }
+        request.quantity?.let { stock.quantity = it }
+
+        return productStockRepository.save(stock)
+    }
+
+    fun deleteProductStock(stockId: Long) {
+        val stock = readProductStockById(stockId)
+        productStockRepository.delete(stock)
+    }
 }
