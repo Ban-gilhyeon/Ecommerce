@@ -14,5 +14,8 @@ class OrderItem(
 
     @Column(nullable = false)
     val productId: Long,
+
+   @Column(nullable = false)
+    val stockId: Long,
 ) {
 }

@@ -1,6 +1,5 @@
 package small.ecommerce.auth.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -36,6 +35,10 @@ class SecurityConfig (
                 //공개 API
                 it.requestMatchers(
                     "/",
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs",
+                    "/v3/api-docs/**",
                     "/api/v1/auth/**",
                     "/api/v1/brand/list",
                     "/api/v1/product/{brandId}/list"
